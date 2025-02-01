@@ -1,8 +1,8 @@
 package com.paysys.payment.adapters.outbound;
 
-import com.paysys.payment.ports.outbound.OrderServiceApi;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
+import com.paysys.order.OrderServiceApi;
 
 @Service
 public class OrderServiceAdapter implements OrderServiceApi {

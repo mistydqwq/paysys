@@ -7,7 +7,6 @@ import com.paysys.payment.domain.enums.PaymentStatusEnum;
 import com.paysys.payment.domain.enums.TransactionTypeEnum;
 import com.paysys.payment.domain.valueobj.PaymentVO;
 import com.paysys.payment.ports.inbound.CreatePaymentUseCase;
-import com.paysys.payment.ports.outbound.OrderServiceApi;
 import com.paysys.payment.ports.outbound.PaymentChannelApi;
 import com.paysys.payment.ports.outbound.PaymentRepositoryPort;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +14,7 @@ import org.apache.dubbo.rpc.RpcContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.paysys.order.OrderServiceApi;
 
 import java.util.Optional;
 import java.util.UUID;

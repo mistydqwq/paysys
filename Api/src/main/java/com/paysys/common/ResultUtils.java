@@ -1,4 +1,4 @@
-package com.paysys.order.common;
+package com.paysys.common;
 
 /**
  * 返回工具类
@@ -13,7 +13,7 @@ public class ResultUtils {
      * @return
      * @param <T>
      */
-    public static <T>BaseResponse<T> success(T data){
+    public static <T> BaseResponse<T> success(T data){
         return new BaseResponse<>(0, data,"ok", "");
     }
 

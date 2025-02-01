@@ -1,17 +1,16 @@
 package com.paysys.stock;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.paysys.stock.adapters.inbound.grpc.StockServiceApi;
 import com.paysys.stock.adapters.outbound.StockMapper;
-import com.paysys.stock.common.BaseResponse;
+import com.paysys.common.BaseResponse;
 import com.paysys.stock.domain.entities.Stock;
-import com.paysys.stock.domain.valueobj.OrderItem;
 import com.paysys.stock.domain.valueobj.StockVO;
 import com.paysys.stock.ports.outbound.StockRepositoryPort;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import com.paysys.vo.OrderItem;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

@@ -1,9 +1,8 @@
 package com.paysys.order;
 
-import com.paysys.order.adapters.inbound.OrderServiceApi;
-import com.paysys.order.common.BaseResponse;
-import com.paysys.order.domain.valueobj.OrderItem;
-import com.paysys.order.ports.outbound.StockServiceApi;
+import com.paysys.common.BaseResponse;
+import com.paysys.stock.StockServiceApi;
+import com.paysys.vo.OrderItem;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,7 @@ class DubboTests {
     @Test
     void testStockApi(){
         String testOrderId = "ac06f600-6bc0-44a4-9cb3-ab5af1060eb4";
-        List<OrderItem> testOrderItems = List.of(new OrderItem("1", "1", 1, new BigDecimal("100.00")));
+        List<OrderItem> testOrderItems = List.of(new OrderItem("1", "1", 1L, new BigDecimal("100.00")));
         BaseResponse<Boolean> res = stockServiceApi.reserveStock(testOrderId, testOrderItems);
         System.out.println(res);
     }

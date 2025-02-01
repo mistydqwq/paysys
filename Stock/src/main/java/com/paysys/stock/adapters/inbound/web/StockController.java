@@ -1,7 +1,7 @@
 package com.paysys.stock.adapters.inbound.web;
 
 import com.paysys.stock.application.commands.UpdateStockCommand;
-import com.paysys.stock.common.BaseResponse;
+import com.paysys.common.BaseResponse;
 import com.paysys.stock.ports.inbound.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

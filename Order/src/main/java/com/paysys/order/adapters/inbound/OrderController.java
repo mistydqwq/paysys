@@ -1,7 +1,7 @@
 package com.paysys.order.adapters.inbound;
 
 import com.paysys.order.application.commands.CreateOrderCommand;
-import com.paysys.order.common.BaseResponse;
+import com.paysys.common.BaseResponse;
 import com.paysys.order.ports.inbound.CreateOrderUseCase;
 import com.paysys.order.ports.inbound.GetOrderStatusUseCase;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,13 +3,13 @@ package com.paysys.stock.adapters.outbound;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.paysys.stock.domain.entities.Stock;
-import com.paysys.stock.domain.valueobj.OrderItem;
 import com.paysys.stock.domain.valueobj.StockTransactionVO;
 import com.paysys.stock.domain.valueobj.StockVO;
 import com.paysys.stock.ports.outbound.StockRepositoryPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import com.paysys.vo.OrderItem;
 
 import java.math.BigDecimal;
 import java.util.List;

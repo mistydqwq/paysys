@@ -1,15 +1,15 @@
 package com.paysys.order.application.commands;
 
-import com.paysys.order.common.BaseResponse;
-import com.paysys.order.common.ErrorCode;
-import com.paysys.order.common.ResultUtils;
+import com.paysys.common.BaseResponse;
+import com.paysys.common.ErrorCode;
+import com.paysys.common.ResultUtils;
 import com.paysys.order.domain.entities.Order;
 import com.paysys.order.domain.events.OrderCreateEvent;
 import com.paysys.order.domain.valueobj.OrderVO;
 import com.paysys.order.ports.inbound.CreateOrderUseCase;
 import com.paysys.order.ports.outbound.EventPublisherPort;
 import com.paysys.order.ports.outbound.OrderRepositoryPort;
-import com.paysys.order.ports.outbound.StockServiceApi;
+import com.paysys.stock.StockServiceApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

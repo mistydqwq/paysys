@@ -1,10 +1,11 @@
 package com.paysys.stock.adapters.inbound.grpc;
 
-import com.paysys.stock.common.BaseResponse;
-import com.paysys.stock.domain.valueobj.OrderItem;
+import com.paysys.common.BaseResponse;
+import com.paysys.stock.StockServiceApi;
 import com.paysys.stock.ports.inbound.ReleaseStockUseCase;
 import com.paysys.stock.ports.inbound.ReserveStockUseCase;
 import org.apache.dubbo.config.annotation.DubboService;
+import com.paysys.vo.OrderItem;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class DubboConsumer implements StockServiceApi {
     }
 
     @Override
-    public Boolean releaseStock(String orderId, List<OrderItem> list) {
+    public boolean releaseStock(String orderId, List<OrderItem> list) {
         return releaseStockUseCase.releaseStock(orderId, list);
     }
 

@@ -1,14 +1,14 @@
 package com.paysys.stock.application.commands;
 
-import com.paysys.stock.common.BaseResponse;
-import com.paysys.stock.common.ResultUtils;
-import com.paysys.stock.domain.valueobj.OrderItem;
+import com.paysys.common.BaseResponse;
+import com.paysys.common.ResultUtils;
 import com.paysys.stock.ports.inbound.ReserveStockUseCase;
 import com.paysys.stock.ports.outbound.StockRepositoryPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.paysys.vo.OrderItem;
 
 import java.util.List;
 

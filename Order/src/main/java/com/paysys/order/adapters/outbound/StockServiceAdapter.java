@@ -1,10 +1,11 @@
 package com.paysys.order.adapters.outbound;
 
-import com.paysys.order.common.BaseResponse;
-import com.paysys.order.domain.valueobj.OrderItem;
-import com.paysys.order.ports.outbound.StockServiceApi;
+
+import com.paysys.stock.StockServiceApi;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
+import com.paysys.common.BaseResponse;
+import com.paysys.vo.OrderItem;
 
 import java.util.List;
 

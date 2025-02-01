@@ -1,7 +1,8 @@
 package com.paysys.stock.ports.outbound;
 
 import com.paysys.stock.domain.entities.Stock;
-import com.paysys.stock.domain.valueobj.OrderItem;
+import com.paysys.vo.OrderItem;
+
 
 import java.util.List;
 import java.util.Optional;

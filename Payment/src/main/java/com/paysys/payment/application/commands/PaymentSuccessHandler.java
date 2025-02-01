@@ -2,10 +2,10 @@ package com.paysys.payment.application.commands;
 
 import com.paysys.payment.ports.inbound.HandlePaymentSuccessUseCase;
 import com.paysys.payment.ports.inbound.UpdatePaymentStatusUseCase;
-import com.paysys.payment.ports.outbound.OrderServiceApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.paysys.order.OrderServiceApi;
 
 @Service
 @Slf4j

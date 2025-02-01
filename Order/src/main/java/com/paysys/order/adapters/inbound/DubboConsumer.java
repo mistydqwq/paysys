@@ -1,11 +1,13 @@
 package com.paysys.order.adapters.inbound;
 
+import com.paysys.order.OrderServiceApi;
 import com.paysys.order.ports.inbound.UpdateOrderStatusUseCase;
 import com.paysys.order.ports.inbound.UpdatePaymentLinkUseCase;
 import org.apache.dubbo.config.annotation.DubboService;
 
+
 @DubboService(version = "1.0.0")
-public class DubboConsumer implements OrderServiceApi{
+public class DubboConsumer implements OrderServiceApi {
     private final UpdateOrderStatusUseCase updateOrderStatusUseCase;
     private final UpdatePaymentLinkUseCase updatePaymentLinkUseCase;
 

@@ -3,7 +3,7 @@ package com.paysys.order;
 import com.paysys.order.adapters.inbound.RabbitMQConsumer;
 import com.paysys.order.adapters.outbound.RabbitMQPublisher;
 import com.paysys.order.domain.events.OrderCreateEvent;
-import com.paysys.order.domain.valueobj.OrderItem;
+import com.paysys.vo.OrderItem;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ class RabbitMQTests {
         // 1. 定义一个测试消息
         String testOrderId = "TestOrder123";
 
-        List<OrderItem> items = List.of(new OrderItem("p1", "Product 1", 1, BigDecimal.valueOf(100.50)));
+        List<OrderItem> items = List.of(new OrderItem("p1", "Product 1", 1L, BigDecimal.valueOf(100.50)));
         OrderCreateEvent orderCreateEvent = new OrderCreateEvent(testOrderId, items, "Test note");
 
         // 2. 发布消息

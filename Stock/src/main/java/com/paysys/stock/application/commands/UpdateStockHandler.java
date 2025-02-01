@@ -1,8 +1,8 @@
 package com.paysys.stock.application.commands;
 
-import com.paysys.stock.common.BaseResponse;
-import com.paysys.stock.common.ErrorCode;
-import com.paysys.stock.common.ResultUtils;
+import com.paysys.common.BaseResponse;
+import com.paysys.common.ErrorCode;
+import com.paysys.common.ResultUtils;
 import com.paysys.stock.domain.entities.Stock;
 import com.paysys.stock.ports.inbound.UpdateStockUseCase;
 import com.paysys.stock.ports.outbound.StockRepositoryPort;

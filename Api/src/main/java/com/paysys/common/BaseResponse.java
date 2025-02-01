@@ -1,4 +1,4 @@
-package com.paysys.order.common;
+package com.paysys.common;
 
 import lombok.Data;
 

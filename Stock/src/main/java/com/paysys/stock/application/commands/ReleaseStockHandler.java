@@ -1,8 +1,8 @@
 package com.paysys.stock.application.commands;
 
-import com.paysys.stock.domain.valueobj.OrderItem;
 import com.paysys.stock.ports.inbound.ReleaseStockUseCase;
 import com.paysys.stock.ports.outbound.StockRepositoryPort;
+import com.paysys.vo.OrderItem;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

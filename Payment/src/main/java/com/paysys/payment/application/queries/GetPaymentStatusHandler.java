@@ -1,8 +1,8 @@
 package com.paysys.payment.application.queries;
 
-import com.paysys.payment.common.BaseResponse;
-import com.paysys.payment.common.ErrorCode;
-import com.paysys.payment.common.ResultUtils;
+import com.paysys.common.BaseResponse;
+import com.paysys.common.ErrorCode;
+import com.paysys.common.ResultUtils;
 import com.paysys.payment.domain.entities.Payment;
 import com.paysys.payment.ports.inbound.GetPaymentStatusUseCase;
 import com.paysys.payment.ports.outbound.PaymentRepositoryPort;

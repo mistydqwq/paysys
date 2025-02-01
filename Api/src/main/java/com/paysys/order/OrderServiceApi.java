@@ -1,4 +1,4 @@
-package com.paysys.order.adapters.inbound;
+package com.paysys.order;
 
 public interface OrderServiceApi {
     Boolean updateOrderStatus(String orderId, int status);

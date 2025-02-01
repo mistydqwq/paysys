@@ -1,7 +1,7 @@
 package com.paysys.stock.ports.inbound;
 
-import com.paysys.stock.common.BaseResponse;
-import com.paysys.stock.domain.valueobj.OrderItem;
+import com.paysys.common.BaseResponse;
+import com.paysys.vo.OrderItem;
 
 import java.util.List;
 

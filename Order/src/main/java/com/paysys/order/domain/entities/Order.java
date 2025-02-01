@@ -3,7 +3,7 @@ package com.paysys.order.domain.entities;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.paysys.order.domain.enums.OrderStatusEnum;
-import com.paysys.order.domain.valueobj.OrderItem;
+import com.paysys.vo.OrderItem;
 import com.paysys.order.domain.valueobj.OrderVO;
 import lombok.Data;
 
