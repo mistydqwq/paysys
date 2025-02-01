@@ -1,0 +1,99 @@
+spring:
+  application:
+    name: service-stock
+
+  # DataSource Config
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/payment
+    username: root
+    password: qinminghao.526.
+  session:
+    timeout: 86400
+
+  sql:
+    init:
+      mode: always # 总是执行初始化
+      schema-locations: classpath:schema.sql # 建表脚本位置
+      continue-on-error: true # 发生错误时继续执行
+
+#  rabbitmq:
+#    host: localhost
+#    port: 5672
+#    username: guest
+#    password: guest
+#    virtual-host: /
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # Nacos ????
+#      config:
+#        server-addr: localhost:8848 # Nacos ??????
+#        file-extension: yaml
+#        group: DEFAULT_GROUP
+
+dubbo:
+  application:
+    name: ${spring.application.name} # ???
+  registry:
+    address: nacos://${spring.cloud.nacos.discovery.server-addr} # ?? Nacos ??????
+  protocol:
+    name: dubbo
+    port: 20881 # Dubbo ????
+  provider:
+    timeout: 5000
+
+redis:
+  host: localhost       # ??? Docker ????? Redis???? localhost
+  port: 6379            # Redis ????
+  password:            # ???????????
+  timeout: 6000         # ????????
+  lettuce:
+    pool:
+      max-active: 8     # ?????
+      max-idle: 8       # ???????
+      min-idle: 0       # ???????
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # ?????????
+      logic-delete-value: 1 # ??????
+      logic-not-delete-value: 0 # ??????
+
+server:
+  port: 8081
+  servlet:
+    context-path: /
+
+# springdoc-openapi????
+springdoc:
+  swagger-ui:
+    #???swagger??????,??http:localhost:8080/swagger-ui.html???????swagger??
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs    #swagger??????
+    enabled: true   #????????
+  group-configs:
+    - group: 'default'   #????
+      paths-to-match: '/**'   #?????????,???/**
+      packages-to-scan: com.example.servicestock    #?????????,?????????????
+
+# knife4j???????????????(??????)
+knife4j:
+  enable: true    #??knife4j,????@EnableKnife4j??
+  setting:
+    language: zh_cn   #??
+    swagger-model-name: ?????   #???SwaggerModel??,??
+  # production: true
+
+management:
+  health:
+    rabbit:
+      enabled: false

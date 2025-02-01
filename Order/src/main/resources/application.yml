@@ -1,0 +1,100 @@
+spring:
+  application:
+    name: order-service
+
+  # DataSource Config
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/payment
+    username: root
+    password: qinminghao.526.
+  session:
+    timeout: 86400
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+
+#  config:
+#    import: optional:nacos://localhost:8848
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # Nacos 服务地址
+#      config:
+#        server-addr: localhost:8848 # Nacos 配置中心地址
+#        file-extension: yaml
+#        group: DEFAULT_GROUP
+
+dubbo:
+  application:
+    name: order-service # 服务名
+  registry:
+    address: nacos://localhost:8848 # 使用 Nacos 作为注册中心
+  protocol:
+    name: dubbo
+    port: 20880 # Dubbo 服务端口
+  provider:
+    timeout: 5000
+
+
+  redis:
+    host: localhost       # 如果在 Docker 容器中运行 Redis，则使用 localhost
+    port: 6379            # Redis 默认端口
+    password:             # 如果未配置密码，可留空
+    timeout: 6000         # 超时时间（可选）
+    lettuce:
+      pool:
+        max-active: 8     # 最大连接数
+        max-idle: 8       # 最大空闲连接数
+        min-idle: 0       # 最小空闲连接数
+
+redisson:
+  config:
+    singleServerConfig:
+      address: "redis://localhost:6379"
+      password:
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # ?????????
+      logic-delete-value: 1 # ??????
+      logic-not-delete-value: 0 # ??????
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+# springdoc-openapi????
+springdoc:
+  swagger-ui:
+    #???swagger??????,??http:localhost:8080/swagger-ui.html???????swagger??
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs    #swagger??????
+    enabled: true   #????????
+  group-configs:
+    - group: 'default'   #????
+      paths-to-match: '/**'   #?????????,???/**
+      packages-to-scan: com.mistyd.order    #?????????,?????????????
+
+# knife4j???????????????(??????)
+knife4j:
+  enable: true    #??knife4j,????@EnableKnife4j??
+  setting:
+    language: zh_cn   #??
+    swagger-model-name: ?????   #???SwaggerModel??,??
+  # production: true
+
+
