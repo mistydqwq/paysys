@@ -82,8 +82,8 @@ public class PaymentWebhookController {
         return notifyParam;
     }
 
-    private PaymentCommand convertToPaymentCommand(AlipayNotifyParam notifyParam) {
-        PaymentCommand command = new PaymentCommand();
+    private PaymentResultCommand convertToPaymentCommand(AlipayNotifyParam notifyParam) {
+        PaymentResultCommand command = new PaymentResultCommand();
         command.setTransactionId(notifyParam.getOutTradeNo());
         command.setChannelTransactionId(notifyParam.getTradeNo());
         command.setTradeStatus(notifyParam.getTradeStatus());
@@ -107,7 +107,7 @@ public class PaymentWebhookController {
 
             // 3. 构造回调参数对象
             AlipayNotifyParam notifyParam = buildNotifyParam(params);
-            PaymentCommand command = convertToPaymentCommand(notifyParam);
+            PaymentResultCommand command = convertToPaymentCommand(notifyParam);
 
             // 4. 根据交易状态调用处理器
             boolean success;

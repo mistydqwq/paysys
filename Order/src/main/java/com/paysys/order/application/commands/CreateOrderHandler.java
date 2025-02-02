@@ -13,6 +13,8 @@ import com.paysys.stock.StockServiceApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class CreateOrderHandler implements CreateOrderUseCase {
 
@@ -30,8 +32,10 @@ public class CreateOrderHandler implements CreateOrderUseCase {
         orderVO.setCustomerId(createOrderCommand.getCustomerId());
         orderVO.setItems(createOrderCommand.getItems());
         orderVO.setNote(createOrderCommand.getNote());
+        orderVO.setStatus(0);
         Order order = Order.fromVO(orderVO);
         order.setOrderId(order.generateOrderId());
+        order.setTotalAmount(order.calculateTotalAmount());
         order.Pending();
 
         // check order
@@ -46,7 +50,6 @@ public class CreateOrderHandler implements CreateOrderUseCase {
         }
 
         // save order
-        order.setTotalAmount(order.calculateTotalAmount());
         order.Created();
         boolean saveRes=orderRepositoryPort.save(order);
         if(!saveRes){

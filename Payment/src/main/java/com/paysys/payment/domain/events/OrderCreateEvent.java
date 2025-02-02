@@ -1,6 +1,6 @@
 package com.paysys.payment.domain.events;
 
-import com.paysys.payment.domain.valueobj.OrderItem;
+import com.paysys.vo.OrderItem;
 import lombok.Data;
 
 import java.util.List;

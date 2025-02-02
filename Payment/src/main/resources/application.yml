@@ -1,6 +1,6 @@
 spring:
   application:
-    name: payment
+    name: payment-service
 
   # DataSource Config
   datasource:
@@ -17,6 +17,22 @@ spring:
     username: guest
     password: guest
     virtual-host: /
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+dubbo:
+  application:
+    name: ${spring.application.name} # ???
+  registry:
+    address: nacos://${spring.cloud.nacos.discovery.server-addr} # ?? Nacos ??????
+  protocol:
+    name: dubbo
+    port: 20882 # Dubbo ????
+  provider:
+    timeout: 5000
 
 mybatis-plus:
   configuration:
@@ -55,10 +71,6 @@ knife4j:
     language: zh_cn   #??
     swagger-model-name: ?????   #???SwaggerModel??,??
   # production: true
-cloud:
-  nacos:
-    discovery:
-      enabled: false
 
 alipay:
   app-id: 9021000143677392

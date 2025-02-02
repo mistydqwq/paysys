@@ -9,7 +9,7 @@ public enum PaymentStatusEnum {
     REFUNDED(2, "refunded"),
     PENDING(3, "pending");
 
-    private final int code;
+    private final Integer code;
     private final String description;
 
     PaymentStatusEnum(int code, String description) {

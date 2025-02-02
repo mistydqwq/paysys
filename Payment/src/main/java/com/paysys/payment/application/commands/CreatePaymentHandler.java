@@ -55,6 +55,7 @@ public class CreatePaymentHandler implements CreatePaymentUseCase {
             Optional<Payment> existingPayment = paymentRepositoryPort.findByOrderId(payment.getOrderId());
             if (existingPayment.isPresent()) {
                 log.warn("Payment record already exists for order: {}", payment.getOrderId());
+                System.out.println("Payment record already exists for order: " + payment.getOrderId());
                 return false;
             }
             String channelResponse;
@@ -68,16 +69,19 @@ public class CreatePaymentHandler implements CreatePaymentUseCase {
             }
             catch (Exception e){
                 log.error("调用支付渠道失败", e);
+                System.out.println("调用支付渠道失败");
                 return false;
             }
 
             // 解析支付渠道返回的支付链接
             ChannelProcessResponse channelRes = gson.fromJson(channelResponse, ChannelProcessResponse.class);
             // 设置支付宝返回的交易信息
-            if(!channelRes.isSuccess()){
+            if(channelRes.getData()==null){
                 log.error("创建支付链接失败: {}", channelRes.getMsg());
+                System.out.println("创建支付链接失败: " + channelRes.getMsg());
                 return false;
             }
+
 
             // 6. 保存支付记录，通过Dubbo发送支付链接到订单服务
             boolean saveRes = paymentRepositoryPort.save(payment);
@@ -90,10 +94,12 @@ public class CreatePaymentHandler implements CreatePaymentUseCase {
                 if (!res.isSuccess()) {
                     log.error("取消支付失败: {}", payment.getOrderId());
                 }
-                payment.setTransactionId(res.getTradeNo());
+                payment.setChannelTransactionId(res.getTradeNo());
                 log.error("保存支付记录失败: {}", payment.getOrderId());
+                System.out.println("保存支付记录失败: " + payment.getOrderId());
                 return false;
             }
+
 
             // 7. 通过 Dubbo 调用订单服务更新支付链接
             String paymentLink = channelRes.getData(); // 支付宝返回的支付表单或链接
@@ -101,6 +107,7 @@ public class CreatePaymentHandler implements CreatePaymentUseCase {
             Boolean updateRes = orderServiceApi.updatePaymentLink(payment.getOrderId(), paymentLink);
             if (updateRes == null || !updateRes) {
                 log.error("更新订单支付链接失败: {}", payment.getOrderId());
+                System.out.println("更新订单支付链接失败: " + payment.getOrderId());
                 try {
                     // 1. 调用支付渠道撤销支付
                     String cancelRes = paymentChannelApi.cancelPayment(
@@ -110,7 +117,7 @@ public class CreatePaymentHandler implements CreatePaymentUseCase {
                     if (!res.isSuccess()) {
                         log.error("取消支付失败: {}", payment.getOrderId());
                     }
-
+                    payment.setChannelTransactionId(res.getTradeNo());
                     // 2. 删除支付记录
                     paymentRepositoryPort.deleteById(payment.getTransactionId());
                 } catch (Exception ex){

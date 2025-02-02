@@ -18,7 +18,7 @@ public class PaymentFailedHandler implements HandlePaymentFailedUseCase {
     private OrderServiceApi orderServiceApi;
 
     @Override
-    public Boolean handle(PaymentCommand command) {
+    public Boolean handle(PaymentResultCommand command) {
         try {
             UpdatePaymentStatusCommand updatePaymentStatusCommand = new UpdatePaymentStatusCommand();
             updatePaymentStatusCommand.setTransactionId(command.getTransactionId());

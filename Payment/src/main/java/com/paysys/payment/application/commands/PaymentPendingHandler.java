@@ -15,7 +15,7 @@ public class PaymentPendingHandler implements HandlePaymentPendingUseCase {
     private UpdatePaymentStatusUseCase updatePaymentStatusUseCase;
 
     @Override
-    public Boolean handle(PaymentCommand command) {
+    public Boolean handle(PaymentResultCommand command) {
         try {
             UpdatePaymentStatusCommand updatePaymentStatusCommand = new UpdatePaymentStatusCommand();
             updatePaymentStatusCommand.setTransactionId(command.getTransactionId());

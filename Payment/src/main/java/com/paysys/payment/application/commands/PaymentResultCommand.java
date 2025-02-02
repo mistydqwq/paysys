@@ -3,7 +3,7 @@ package com.paysys.payment.application.commands;
 import lombok.Data;
 
 @Data
-public class PaymentCommand {
+public class PaymentResultCommand {
     private String transactionId;
     private String channelTransactionId;
     private String tradeStatus;

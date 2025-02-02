@@ -15,3 +15,6 @@ CREATE TABLE orders
     UNIQUE KEY idx_order_id (order_id),
     INDEX idx_customer_id (customer_id)
 ) COMMENT '订单表' COLLATE = utf8mb4_unicode_ci;
+
+ALTER TABLE orders
+    MODIFY COLUMN payment_link TEXT DEFAULT NULL COMMENT '支付链接';

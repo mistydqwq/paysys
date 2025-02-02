@@ -50,7 +50,7 @@ public class PaymentVO implements Serializable {
     /**
      * 交易状态(SUCCESS/FAILED)
      */
-    private int transactionStatus;
+    private Integer transactionStatus;
 
     /**
      * 错误码

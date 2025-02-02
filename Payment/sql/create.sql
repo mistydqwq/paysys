@@ -14,3 +14,11 @@ CREATE TABLE payment (
     KEY idx_order_id (order_id),
     KEY idx_channel_transaction_id (channel_transaction_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付交易表';
+
+
+
+ALTER TABLE payment
+    MODIFY COLUMN transaction_id VARCHAR(64) NOT NULL COMMENT '交易流水号';
+
+ALTER TABLE payment
+    MODIFY COLUMN order_id VARCHAR(64) NOT NULL COMMENT '支付订单号';

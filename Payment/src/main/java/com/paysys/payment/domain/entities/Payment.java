@@ -35,15 +35,12 @@ public class Payment {
                 || transactionType == null || transactionStatus == null) {
             return false;
         }
-
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             return false;
         }
-
         if (!TransactionTypeEnum.contains(transactionType.getCode())) {
             return false;
         }
-
         return true;
     }
 
@@ -71,17 +68,39 @@ public class Payment {
      */
     public static Payment fromVO(PaymentVO paymentVO) {
         Payment payment = new Payment();
-        payment.setId(paymentVO.getId());
-        payment.setTransactionId(paymentVO.getTransactionId());
-        payment.setOrderId(paymentVO.getOrderId());
-        payment.setChannelTransactionId(paymentVO.getChannelTransactionId());
-        payment.setAmount(paymentVO.getAmount());
-        payment.setTransactionType(TransactionTypeEnum.fromCode(paymentVO.getTransactionType()));
-        payment.setTransactionStatus(PaymentStatusEnum.fromCode(paymentVO.getTransactionStatus()));
-        payment.setErrorCode(paymentVO.getErrorCode());
-        payment.setErrorMsg(paymentVO.getErrorMsg());
-        payment.setCreateTime(paymentVO.getCreateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-        payment.setUpdateTime(paymentVO.getUpdateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+        if(paymentVO.getId() != null){
+            payment.setId(paymentVO.getId());
+        }
+        if(paymentVO.getTransactionId()!=null){
+            payment.setTransactionId(paymentVO.getTransactionId());
+        }
+        if(paymentVO.getOrderId()!=null){
+            payment.setOrderId(paymentVO.getOrderId());
+        }
+        if(paymentVO.getChannelTransactionId()!=null){
+            payment.setChannelTransactionId(paymentVO.getChannelTransactionId());
+        }
+        if(paymentVO.getAmount()!=null){
+            payment.setAmount(paymentVO.getAmount());
+        }
+        if(paymentVO.getTransactionType()!=null){
+            payment.setTransactionType(TransactionTypeEnum.fromCode(paymentVO.getTransactionType()));
+        }
+        if(paymentVO.getTransactionStatus()!=null){
+            payment.setTransactionStatus(PaymentStatusEnum.fromCode(paymentVO.getTransactionStatus()));
+        }
+        if(paymentVO.getErrorCode()!=null){
+            payment.setErrorCode(paymentVO.getErrorCode());
+        }
+        if(paymentVO.getErrorMsg()!=null){
+            payment.setErrorMsg(paymentVO.getErrorMsg());
+        }
+        if(paymentVO.getCreateTime()!=null){
+            payment.setCreateTime(paymentVO.getCreateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+        }
+        if(paymentVO.getUpdateTime()!=null){
+            payment.setUpdateTime(paymentVO.getUpdateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+        }
         return payment;
     }
 

@@ -4,7 +4,7 @@ import com.alibaba.nacos.shaded.com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.paysys.payment.application.commands.CreatePaymentCommand;
 import com.paysys.payment.domain.events.OrderCreateEvent;
-import com.paysys.payment.domain.valueobj.OrderItem;
+import com.paysys.vo.OrderItem;
 import com.paysys.payment.infrastructure.RabbitMQConfig;
 import com.paysys.payment.ports.inbound.CreatePaymentUseCase;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +28,12 @@ public class RabbitMQConsumer {
         this.createPaymentUseCase = createPaymentUseCase;
     }
 
-    @RabbitListener(queues = RabbitMQConfig.ORDER_QUEUE)
+    @RabbitListener(queues = RabbitMQConfig.ORDER_QUEUE, ackMode = "MANUAL")
     public void handleOrderMessage(Message message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) {
         try {
             String messageStr = new String(message.getBody());
             log.info("Received order message: {}", messageStr);
-
+            //System.out.println("Received order message: " + messageStr);
             // 解析消息
             OrderCreateEvent orderCreateEvent = gson.fromJson(messageStr, OrderCreateEvent.class);
             // 计算订单总金额

@@ -22,7 +22,7 @@ public enum TransactionTypeEnum {
 
     public static boolean contains(String transactionType) {
         for (TransactionTypeEnum type : TransactionTypeEnum.values()) {
-            if (type.name().equals(transactionType)) {
+            if (type.code.equals(transactionType)) {
                 return true;
             }
         }

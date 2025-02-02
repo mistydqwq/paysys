@@ -85,14 +85,30 @@ public class Order {
 
     public static Order fromVO(OrderVO orderVO){
         Order order = new Order();
-        order.setId(orderVO.getId());
-        order.setOrderId(orderVO.getOrderId());
-        order.setCustomerId(orderVO.getCustomerId());
-        order.setItems(new Gson().fromJson(orderVO.getItems(), orderItemListType));
-        order.setStatus(OrderStatusEnum.fromCode(orderVO.getStatus()));
-        order.setPaymentLink(orderVO.getPaymentLink());
-        order.setTotalAmount(orderVO.getTotalAmount());
-        order.setNote(orderVO.getNote());
+        if(orderVO.getId() != null){
+            order.setId(orderVO.getId());
+        }
+        if(orderVO.getOrderId() != null){
+            order.setOrderId(orderVO.getOrderId());
+        }
+        if(orderVO.getCustomerId() != null){
+            order.setCustomerId(orderVO.getCustomerId());
+        }
+        if(orderVO.getItems() != null){
+            order.setItems(new Gson().fromJson(orderVO.getItems(), orderItemListType));
+        }
+        if(orderVO.getStatus() != null){
+            order.setStatus(OrderStatusEnum.fromCode(orderVO.getStatus()));
+        }
+        if(orderVO.getPaymentLink() != null){
+            order.setPaymentLink(orderVO.getPaymentLink());
+        }
+        if(orderVO.getTotalAmount() != null){
+            order.setTotalAmount(orderVO.getTotalAmount());
+        }
+        if(orderVO.getNote() != null){
+            order.setNote(orderVO.getNote());
+        }
         return order;
     }
 }

@@ -21,6 +21,7 @@ class AlipayApplicationTests {
     @Test
     void testPayment() throws InterruptedException {
         String channelResponse = paymentChannelApi.processPayment("1234", new BigDecimal("100.00"), "Test Payment");
+        System.out.println(channelResponse);
         ChannelProcessResponse channelRes = gson.fromJson(channelResponse, ChannelProcessResponse.class);
         System.out.println(channelRes);
         Thread.sleep(300_000);
