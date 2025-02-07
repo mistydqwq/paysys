@@ -21,17 +21,17 @@ public class RabbitMQConsumer {
         this.updatePaymentLinkUseCase = updatePaymentLinkUseCase;
     }
 
-    @RabbitListener(queues = RabbitMQConfig.ORDER_QUEUE)
-    public void handleOrderCreatedEvent(String message) {
-        try {
-            // 使用 Gson 将 JSON 字符串反序列化为 OrderCreateEvent 对象
-            OrderCreateEvent event = gson.fromJson(message, OrderCreateEvent.class);
-            System.out.println("Received event: " + event);
-            // 处理事件逻辑
-        } catch (Exception e) {
-            System.err.println("Failed to process message: " + e.getMessage());
-        }
-    }
+//    @RabbitListener(queues = RabbitMQConfig.ORDER_QUEUE)
+//    public void handleOrderCreatedEvent(String message) {
+//        try {
+//            // 使用 Gson 将 JSON 字符串反序列化为 OrderCreateEvent 对象
+//            OrderCreateEvent event = gson.fromJson(message, OrderCreateEvent.class);
+//            System.out.println("Received event: " + event);
+//            // 处理事件逻辑
+//        } catch (Exception e) {
+//            System.err.println("Failed to process message: " + e.getMessage());
+//        }
+//    }
 
     @RabbitListener(queues = RabbitMQConfig.UPDATE_ORDER_STATUS_QUEUE)
     public void handleUpdateStatusEvent(String message) {
