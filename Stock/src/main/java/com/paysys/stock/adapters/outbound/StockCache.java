@@ -103,7 +103,7 @@ public class StockCache {
     }
 
     // 缓存预热
-    @PostConstruct
+//    @PostConstruct
     public void warmupCache() {
         log.info("Starting stock cache warming up...");
         try {
@@ -136,7 +136,7 @@ public class StockCache {
     }
 
     // 定时刷新缓存
-    @Scheduled(fixedRate = 300000) // 5分钟刷新一次
+//    @Scheduled(fixedRate = 300000) // 5分钟刷新一次
     public void refreshCache() {
         log.info("Starting stock cache refresh...");
         try {
