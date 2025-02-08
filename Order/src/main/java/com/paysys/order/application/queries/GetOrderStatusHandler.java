@@ -7,6 +7,7 @@ import com.paysys.order.domain.entities.Order;
 import com.paysys.order.ports.inbound.GetOrderStatusUseCase;
 import com.paysys.order.ports.outbound.OrderRepositoryPort;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -15,6 +16,7 @@ import java.util.Optional;
 public class GetOrderStatusHandler implements GetOrderStatusUseCase {
 
     @Autowired
+    @Qualifier("redisRepositoryImpl")
     private OrderRepositoryPort orderRepositoryPort;
 
     @Override

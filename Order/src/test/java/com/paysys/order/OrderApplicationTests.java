@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.paysys.common.BaseResponse;
 import com.paysys.order.adapters.outbound.OrderMapper;
 import com.paysys.order.application.commands.CreateOrderCommand;
+import com.paysys.order.domain.entities.Order;
 import com.paysys.order.domain.valueobj.OrderVO;
 import com.paysys.order.ports.inbound.CreateOrderUseCase;
+import com.paysys.order.ports.outbound.OrderRepositoryPort;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
@@ -26,18 +29,27 @@ class OrderApplicationTests {
     @Autowired
     private CreateOrderUseCase createOrderUseCase;
 
+    @Autowired
+    @Qualifier("redisRepositoryImpl")
+    private OrderRepositoryPort orderRepositoryPort;
+
     @Test
     public void testInsertAndSelect() {
         // Prepare test data
         String orderId = UUID.randomUUID().toString();
         OrderVO order = new OrderVO();
         order.setOrderId(orderId);
-        order.setCustomerId("123");
+        order.setCustomerId("abc");
         order.setItems("[{\"productId\":\"p1\",\"quantity\":1}]");
         order.setStatus(0);
         order.setTotalAmount(BigDecimal.valueOf(100.05));
 
+        boolean res = orderRepositoryPort.save(Order.fromVO(order));
 
+        boolean res1 = orderRepositoryPort.findById(orderId).isPresent();
+
+        System.out.println(res);
+        System.out.println(res1);
         // Insert data
 //        int rowsInserted = orderMapper.insert(order);
 //        assertThat(rowsInserted).isEqualTo(1);

@@ -11,6 +11,7 @@ import com.paysys.order.ports.outbound.EventPublisherPort;
 import com.paysys.order.ports.outbound.OrderRepositoryPort;
 import com.paysys.stock.StockServiceApi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class CreateOrderHandler implements CreateOrderUseCase {
     @Autowired
     private StockServiceApi stockServiceApi;
     @Autowired
+    @Qualifier("redisRepositoryImpl")
     private OrderRepositoryPort orderRepositoryPort;
     @Autowired
     private EventPublisherPort eventPublisherPort;

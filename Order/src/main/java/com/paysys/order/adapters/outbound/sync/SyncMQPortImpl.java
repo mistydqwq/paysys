@@ -1,5 +1,7 @@
 package com.paysys.order.adapters.outbound.sync;
 
+import com.google.gson.Gson;
+import com.paysys.order.infrastructure.RabbitMQConfig;
 import com.paysys.order.ports.outbound.sync.SyncMQPort;
 import org.redisson.api.RStream;
 import org.redisson.api.RedissonClient;
@@ -7,73 +9,45 @@ import org.redisson.api.StreamMessageId;
 import org.redisson.api.stream.StreamAddArgs;
 import org.redisson.api.stream.StreamCreateGroupArgs;
 import org.redisson.api.stream.StreamReadGroupArgs;
+import org.springframework.amqp.core.MessageDeliveryMode;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class SyncMQPortImpl implements SyncMQPort {
 
-    private final RedissonClient redissonClient;
+    private final RabbitTemplate rabbitTemplate;
+    private final Gson gson;
 
-    public SyncMQPortImpl(RedissonClient redissonClient) {
-        this.redissonClient = redissonClient;
+    public SyncMQPortImpl(RabbitTemplate rabbitTemplate, Gson gson) {
+        this.rabbitTemplate = rabbitTemplate;
+        this.gson = gson;
     }
 
     @Override
-    public boolean publishMessage(String streamKey, Map<String, String> message) {
+    public boolean publishMessage(String redisKey, String operationType) {
         try {
-            RStream<String, String> stream = redissonClient.getStream(streamKey);
-            StreamMessageId messageId = stream.add(StreamAddArgs.entries(message));
-            return messageId != null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+            DataSyncEvent event = new DataSyncEvent(redisKey, operationType);
+            String message = gson.toJson(event);
 
-    @Override
-    public void createConsumerGroup(String streamKey, String groupName) {
-        try{
-            RStream<String, String> stream = redissonClient.getStream(streamKey);
-            stream.createGroup(StreamCreateGroupArgs.name(groupName));
-        } catch (Exception e) {
-            if (e.getMessage() != null && !e.getMessage().contains("BUSYGROUP")) {
-                e.printStackTrace();
-            }
-        }
-    }
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.Sync_Exchange,
+                    RabbitMQConfig.Sync_Routing_Key,
+                    message,
+                    msg -> {
+                        msg.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+                        return msg;
+                    });
 
-    @Override
-    public List<RedisMQVO> consumeMessage(String streamKey, String groupName, String consumerName, int count, long blockTimeMs){
-        List<RedisMQVO> msgs = new ArrayList<>();
-        try {
-            RStream<String, String> stream = redissonClient.getStream(streamKey);
-            Map<StreamMessageId, Map<String, String>> readResult =
-                    stream.readGroup(groupName, consumerName, StreamReadGroupArgs.neverDelivered().count(count).timeout(Duration.ofMillis(blockTimeMs)));
-
-            if (readResult != null) {
-                for (Map.Entry<StreamMessageId, Map<String, String>> entry : readResult.entrySet()) {
-                    StreamMessageId smId = entry.getKey();
-                    Map<String, String> body = entry.getValue();
-                    msgs.add(new RedisMQVO(smId.toString(), body));
-                }
-            }
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return msgs;
-    }
-
-    @Override
-    public boolean ackMessage(String streamKey, String groupName, StreamMessageId messageId) {
-        try {
-            RStream<String, String> stream = redissonClient.getStream(streamKey);
-            long ackCount = stream.ack(groupName, messageId);
-            return ackCount > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
+            // 添加日志
             return false;
         }
     }

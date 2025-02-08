@@ -10,7 +10,9 @@ import lombok.Data;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -110,5 +112,81 @@ public class Order {
             order.setNote(orderVO.getNote());
         }
         return order;
+    }
+
+    public static Order fromRedisMap(Map<Object, Object> map) {
+        Order order = new Order();
+        Gson gson = new Gson();
+
+        order.setOrderId((String) map.get("orderId"));
+        order.setCustomerId((String) map.get("customerId"));
+        if(map.containsKey("paymentLink")){
+            order.setPaymentLink((String) map.get("paymentLink"));
+        }
+        if(map.containsKey("note")){
+            order.setNote((String) map.get("note"));
+        }
+
+        // 转换枚举状态
+        if (map.containsKey("status")) {
+            int statusCode = Integer.parseInt(map.get("status").toString());
+            order.setStatus(OrderStatusEnum.fromCode(statusCode));
+        }
+
+        // 转换金额
+        if (map.containsKey("totalAmount")) {
+            order.setTotalAmount(new BigDecimal(map.get("totalAmount").toString()));
+        }
+
+        // 转换时间
+        if (map.containsKey("createTime")) {
+            order.setCreateTime(LocalDateTime.parse(map.get("createTime").toString()));
+        }
+        if (map.containsKey("updateTime")) {
+            order.setUpdateTime(LocalDateTime.parse(map.get("updateTime").toString()));
+        }
+
+        // 转换订单项列表
+        if (map.containsKey("items")) {
+            String itemsJson = (String) map.get("items");
+            order.setItems(gson.fromJson(itemsJson, orderItemListType));
+        }
+
+        return order;
+    }
+
+    public Map<String, Object> toRedisMap() {
+        Gson gson = new Gson();
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("orderId", this.orderId);
+        map.put("customerId", this.customerId);
+        if(this.paymentLink != null){
+            map.put("paymentLink", this.paymentLink);
+        }
+        if(this.note != null){
+            map.put("note", this.note);
+        }
+        if (this.status != null) {
+            map.put("status", this.status.getCode());
+        }
+
+        if (this.totalAmount != null) {
+            map.put("totalAmount", this.totalAmount.toString());
+        }
+
+        if (this.createTime != null) {
+            map.put("createTime", this.createTime.toString());
+        }
+
+        if (this.updateTime != null) {
+            map.put("updateTime", this.updateTime.toString());
+        }
+
+        if (this.items != null) {
+            map.put("items", gson.toJson(this.items));
+        }
+
+        return map;
     }
 }
