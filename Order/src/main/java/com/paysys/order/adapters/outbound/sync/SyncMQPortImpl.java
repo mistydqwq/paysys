@@ -11,6 +11,8 @@ import org.redisson.api.stream.StreamCreateGroupArgs;
 import org.redisson.api.stream.StreamReadGroupArgs;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,7 @@ public class SyncMQPortImpl implements SyncMQPort {
     }
 
     @Override
+    @Retryable(retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public boolean publishMessage(String redisKey, String operationType) {
         try {
             DataSyncEvent event = new DataSyncEvent(redisKey, operationType);
@@ -51,4 +54,5 @@ public class SyncMQPortImpl implements SyncMQPort {
             return false;
         }
     }
+
 }

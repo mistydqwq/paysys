@@ -28,13 +28,6 @@ spring:
     nacos:
       discovery:
         server-addr: localhost:8848 # Nacos ????
-
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-
 #      config:
 #        server-addr: localhost:8848 # Nacos ??????
 #        file-extension: yaml

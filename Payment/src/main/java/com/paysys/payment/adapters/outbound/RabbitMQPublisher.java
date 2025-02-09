@@ -8,6 +8,8 @@ import com.paysys.payment.ports.outbound.EventPublisherPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Primary;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 
@@ -25,6 +27,7 @@ public class RabbitMQPublisher implements EventPublisherPort {
     }
 
     @Override
+    @Retryable(retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public boolean publishEvent(PaymentCreateEvent paymentCreateEvent) {
         try {
             String jsonEvent = gson.toJson(paymentCreateEvent);
@@ -41,6 +44,7 @@ public class RabbitMQPublisher implements EventPublisherPort {
         }
     }
 
+    @Retryable(retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public boolean publishPaymentStatusUpdate(UpdatePaymentStatusCommand command) {
         try {
             String jsonMessage = gson.toJson(command);
@@ -58,6 +62,7 @@ public class RabbitMQPublisher implements EventPublisherPort {
         }
     }
 
+    @Retryable(retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public boolean publishPaymentLinkUpdate(UpdatePaymentStatusCommand command) {
         try {
             String jsonMessage = gson.toJson(command);

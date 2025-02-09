@@ -4,7 +4,10 @@ import com.google.gson.Gson;
 import com.paysys.order.domain.events.OrderCreateEvent;
 import com.paysys.order.infrastructure.RabbitMQConfig;
 import com.paysys.order.ports.outbound.EventPublisherPort;
+import jakarta.annotation.PostConstruct;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +22,7 @@ public class RabbitMQPublisher implements EventPublisherPort {
     }
 
     @Override
+    @Retryable(retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public boolean publishEvent(OrderCreateEvent orderCreateEvent) {
         try {
             String jsonEvent = gson.toJson(orderCreateEvent);
