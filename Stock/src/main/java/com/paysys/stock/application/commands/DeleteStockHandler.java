@@ -6,12 +6,14 @@ import com.paysys.common.ResultUtils;
 import com.paysys.stock.ports.inbound.DeleteStockUseCase;
 import com.paysys.stock.ports.outbound.StockRepositoryPort;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DeleteStockHandler implements DeleteStockUseCase {
 
+    @Qualifier("redisRepositoryImpl")
     @Autowired
     private StockRepositoryPort stockRepositoryPort;
 

@@ -14,4 +14,5 @@ public interface StockRepositoryPort {
     boolean reserveStock(String orderId, List<OrderItem> list);
     boolean releaseStock(String orderId, List<OrderItem> list);
     boolean delete(String productId);
+    boolean checkStockTransaction(String orderId, String type, String status);
 }

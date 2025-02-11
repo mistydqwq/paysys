@@ -6,6 +6,7 @@ import com.paysys.stock.ports.outbound.StockRepositoryPort;
 import com.paysys.vo.OrderItem;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.List;
 @Service
 public class ReleaseStockHandler implements ReleaseStockUseCase {
 
+    @Qualifier("redisRepositoryImpl")
     @Autowired
     private StockRepositoryPort stockRepositoryPort;
 
@@ -27,6 +29,12 @@ public class ReleaseStockHandler implements ReleaseStockUseCase {
     public Boolean releaseStock(String orderId, List<OrderItem> list) {
         if (orderId == null || orderId.isEmpty() || list == null || list.isEmpty()) {
             return false;
+        }
+
+        boolean hasProcessed = stockRepositoryPort.checkStockTransaction(orderId, "RELEASE", "SUCCESS");
+        if (hasProcessed) {
+            log.warn("Order: {} has been processed", orderId);
+            return true;
         }
 
         List<String> productIds = list.stream()

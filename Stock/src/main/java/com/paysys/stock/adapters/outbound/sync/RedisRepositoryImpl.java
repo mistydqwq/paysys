@@ -4,12 +4,15 @@ package com.paysys.stock.adapters.outbound.sync;
 import com.paysys.stock.domain.entities.Stock;
 import com.paysys.stock.ports.outbound.StockRepositoryPort;
 import com.paysys.stock.ports.outbound.sync.SyncMQPort;
+import com.paysys.vo.OrderItem;
 import org.redisson.api.RLock;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -108,6 +111,120 @@ public class RedisRepositoryImpl implements StockRepositoryPort {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
+        }
+    }
+
+    @Override
+    public boolean checkStockTransaction(String orderId, String type, String status) {
+        RLock lock = getStockLock("tx:" + orderId);
+        try {
+            if (lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.SECONDS)) {
+                RMap<String, String> redisMap = redissonClient.getMap("stockTx:" + orderId);
+                return "true".equals(redisMap.get(type + ":" + status));
+            }
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean reserveStock(String orderId, List<OrderItem> list) {
+        if (orderId == null || orderId.isEmpty() || list == null || list.isEmpty()) {
+            return false;
+        }
+        List<String> productIds = list.stream()
+                .map(OrderItem::getProductId)
+                .distinct()
+                .sorted()
+                .toList();
+        try {
+            for (String productId: productIds) {
+                RLock lock = getStockLock(productId);
+                if (!lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.SECONDS)) {
+                    return false;
+                }
+            }
+            for (OrderItem item: list) {
+                RMap<String, Object> redisMap = redissonClient.getMap(getRedisKey(item.getProductId()));
+                if (redisMap.isEmpty()) {
+                    Optional<Stock> dbStock = dbRepository.findById(item.getProductId());
+                    dbStock.ifPresent(this::saveToRedisWithLock);
+                }
+                int reservedQuantity = (int) redisMap.getOrDefault("reservedQuantity", 0);
+                int quantity = (int) redisMap.getOrDefault("quantity", 0);
+                if (quantity - reservedQuantity < item.getQuantity()) {
+                    return false;
+                }
+                redisMap.put("reservedQuantity", reservedQuantity + item.getQuantity());
+            }
+            RMap<String, String> txMap = redissonClient.getMap("stockTx:" + orderId);
+            txMap.put("RESERVE", "true");
+            syncMQPort.publishMessage("stockTx:" + orderId, "RESERVE");
+            return true;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } finally {
+            productIds.forEach(pid -> {
+                RLock lock = getStockLock(pid);
+                if (lock.isHeldByCurrentThread()) {
+                    lock.unlock();
+                }
+            });
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean releaseStock(String orderId, List<OrderItem> list) {
+        if (orderId == null || orderId.isEmpty() || list == null || list.isEmpty()) {
+            return false;
+        }
+        List<String> productIds = list.stream()
+                .map(OrderItem::getProductId)
+                .distinct()
+                .sorted()
+                .toList();
+        try {
+            for (String productId: productIds) {
+                RLock lock = getStockLock(productId);
+                if (!lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.SECONDS)) {
+                    return false;
+                }
+            }
+            for (OrderItem item: list) {
+                RMap<String, Object> redisMap = redissonClient.getMap(getRedisKey(item.getProductId()));
+                if (redisMap.isEmpty()) {
+                    Optional<Stock> dbStock = dbRepository.findById(item.getProductId());
+                    dbStock.ifPresent(this::saveToRedisWithLock);
+                }
+                int reservedQuantity = (int) redisMap.getOrDefault("reservedQuantity", 0);
+                if (reservedQuantity < item.getQuantity()) {
+                    return false;
+                }
+                redisMap.put("reservedQuantity", reservedQuantity - item.getQuantity());
+            }
+            RMap<String, String> txMap = redissonClient.getMap("stockTx:" + orderId);
+            txMap.put("RELEASE", "true");
+            syncMQPort.publishMessage("stockTx:" + orderId, "RELEASE");
+            return true;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } finally {
+            productIds.forEach(pid -> {
+                RLock lock = getStockLock(pid);
+                if (lock.isHeldByCurrentThread()) {
+                    lock.unlock();
+                }
+            });
         }
     }
 

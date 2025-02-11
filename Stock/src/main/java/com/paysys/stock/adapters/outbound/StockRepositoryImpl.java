@@ -104,6 +104,15 @@ public class StockRepositoryImpl implements StockRepositoryPort {
     }
 
     @Override
+    public boolean checkStockTransaction(String orderId, String operationType, String status) {
+        QueryWrapper<StockTransactionVO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("order_id", orderId)
+                .eq("operation_type", operationType)
+                .eq("status", status);
+        return stockTransactionMapper.exists(queryWrapper);
+    }
+
+    @Override
     @Transactional
     public boolean reserveStock(String orderId, List<OrderItem> list) {
         if (orderId == null || orderId.isEmpty() || list == null || list.isEmpty()) {

@@ -7,6 +7,7 @@ import com.paysys.stock.domain.entities.Stock;
 import com.paysys.stock.ports.inbound.GetStockQuantityUseCase;
 import com.paysys.stock.ports.outbound.StockRepositoryPort;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.Optional;
 @Service
 public class GetStockQuantityHandler implements GetStockQuantityUseCase {
 
+    @Qualifier("redisRepositoryImpl")
     @Autowired
     private StockRepositoryPort stockRepositoryPort;
 
