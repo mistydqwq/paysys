@@ -31,6 +31,7 @@ public class RedissonConfig {
                 .setConnectTimeout(10000)
                 .setRetryAttempts(3)
                 .setRetryInterval(1500);
+
         return Redisson.create(config);
     }
 }

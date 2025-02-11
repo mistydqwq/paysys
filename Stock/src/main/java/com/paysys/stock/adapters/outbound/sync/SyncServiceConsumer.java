@@ -15,12 +15,13 @@ import java.util.Optional;
 
 @Component
 public class SyncServiceConsumer implements SyncServicePort {
+
     private final RedissonClient redissonClient;
     private final StockRepositoryPort dbRepository;
     private final Gson gson;
 
     public SyncServiceConsumer(RedissonClient redissonClient,
-                               @Qualifier("stockRepositoryImpl") StockRepositoryPort dbRepository) {
+                               @Qualifier("dbRepositoryImpl") StockRepositoryPort dbRepository) {
         this.redissonClient = redissonClient;
         this.dbRepository = dbRepository;
         this.gson = new Gson();
@@ -43,20 +44,23 @@ public class SyncServiceConsumer implements SyncServicePort {
             switch (dataType) {
                 case "stock":
                     return handleStockSync(event.getOperation(), id);
+                // 如果有其他类型的数据需要同步，可以继续在此处添加 case
                 default:
                     return false;
             }
         } catch (Exception e) {
-            // 添加重试逻辑和日志
+            // 可以添加重试逻辑和更详细的日志
             System.err.println("Failed to process sync message: " + e.getMessage());
             return false;
         }
     }
 
     private boolean handleStockSync(String operation, String productId) {
-        RMap<Object, Object> stockMap = redissonClient.getMap("stock:" + productId);
+        // 统一使用 RMap<String, Object>
+        RMap<String, Object> stockMap = redissonClient.getMap("stock:" + productId);
 
         try {
+            // 将 Redis 中的哈希表数据转换为 Stock 对象
             Stock stock = convertToStock(stockMap);
             return switch (operation.toUpperCase()) {
                 case "CREATE", "UPDATE" -> saveOrUpdateStock(stock);
@@ -70,27 +74,39 @@ public class SyncServiceConsumer implements SyncServicePort {
         }
     }
 
-    private Stock convertToStock(RMap<Object, Object> map) throws DataConversionException {
+    /**
+     * 将 RMap<String, Object> 转换为 Stock 对象
+     */
+    private Stock convertToStock(RMap<String, Object> map) throws DataConversionException {
         try {
             return Stock.fromRedisMap(map);
         } catch (Exception e) {
-            throw new DataConversionException("Redis数据转换Stock失败", e);
+            throw new DataConversionException("Redis 数据转换 Stock 失败", e);
         }
     }
 
+    /**
+     * 新增或更新 Stock
+     */
     private boolean saveOrUpdateStock(Stock stock) {
-        // 使用repository的保存逻辑
         Optional<Stock> existing = dbRepository.findById(stock.getProductId());
         if (existing.isPresent()) {
             return dbRepository.update(stock);
+        } else {
+            return dbRepository.save(stock);
         }
-        return dbRepository.save(stock);
     }
 
+    /**
+     * 删除 Stock
+     */
     private boolean deleteStock(String stockId) {
         return dbRepository.delete(stockId);
     }
 
+    /**
+     * 自定义数据转换异常
+     */
     private static class DataConversionException extends Exception {
         public DataConversionException(String message, Throwable cause) {
             super(message, cause);

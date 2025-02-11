@@ -5,11 +5,15 @@ import com.paysys.stock.domain.entities.Stock;
 import com.paysys.stock.domain.valueobj.StockVO;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RLock;
+import org.redisson.api.RMap;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -19,13 +23,13 @@ import java.util.concurrent.TimeUnit;
 public class StockCache {
 
     private static final String STOCK_CACHE_PREFIX = "stock:";
-    private static final long CACHE_EXPIRE_TIME = 60; // 60分钟
+    private static final long CACHE_EXPIRE_MINUTES = 60; // 60分钟
 
     @Autowired
     private StockMapper stockMapper;
 
     @Autowired
-    private RedisTemplate<String, Stock> redisTemplate;
+    private RedissonClient redissonClient;
 
     // 获取库存缓存key
     private String getStockKey(String productId) {
@@ -34,9 +38,9 @@ public class StockCache {
 
     // 从缓存获取库存
     public Optional<Stock> getFromCache(String productId) {
+        RBucket<Stock> bucket = redissonClient.getBucket(getStockKey(productId));
         try {
-            Stock stock = redisTemplate.opsForValue().get(getStockKey(productId));
-            return Optional.ofNullable(stock);
+            return Optional.ofNullable(bucket.get());
         } catch (Exception e) {
             log.error("Failed to get stock from cache", e);
             return Optional.empty();
@@ -45,9 +49,9 @@ public class StockCache {
 
     // 将库存写入缓存
     public void sendToCache(Stock stock) {
+        RBucket<Stock> bucket = redissonClient.getBucket(getStockKey(stock.getProductId()));
         try {
-            String key = getStockKey(stock.getProductId());
-            redisTemplate.opsForValue().set(key, stock, CACHE_EXPIRE_TIME, TimeUnit.MINUTES);
+            bucket.set(stock, CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
         } catch (Exception e) {
             log.error("Failed to send stock to cache", e);
         }
@@ -55,27 +59,23 @@ public class StockCache {
 
     // 从缓存删除库存
     public void removeFromCache(String productId) {
+        RBucket<Stock> bucket = redissonClient.getBucket(getStockKey(productId));
         try {
-            redisTemplate.delete(getStockKey(productId));
+            bucket.delete();
         } catch (Exception e) {
             log.error("Failed to remove stock from cache", e);
         }
     }
 
-    // 更新库存预留数量
+    // 更新库存预留数量（原子操作）
     public boolean updateReservedQuantity(String productId, long quantity) {
+        RMap<String, Long> stockMap = redissonClient.getMap(getStockKey(productId));
         try {
-            String key = getStockKey(productId);
-            Stock stock = redisTemplate.opsForValue().get(key);
-            if (stock != null) {
-                long newReserved = stock.getReservedQuantity() + quantity;
-                if (newReserved >= 0 && newReserved <= stock.getQuantity()) {
-                    stock.setReservedQuantity(newReserved);
-                    redisTemplate.opsForValue().set(key, stock, CACHE_EXPIRE_TIME, TimeUnit.MINUTES);
-                    return true;
-                }
-            }
-            return false;
+            return stockMap.computeIfPresent("reservedQuantity", (k, v) -> {
+                long newValue = v + quantity;
+                if (newValue < 0) return null; // 表示操作失败
+                return newValue;
+            }) != null;
         } catch (Exception e) {
             log.error("Failed to update reserved quantity in cache: {}", productId, e);
             return false;
@@ -84,96 +84,97 @@ public class StockCache {
 
     // 判断缓存是否存在
     public boolean exists(String productId) {
+        RBucket<Stock> bucket = redissonClient.getBucket(getStockKey(productId));
         try {
-            return Boolean.TRUE.equals(redisTemplate.hasKey(getStockKey(productId)));
+            return bucket.isExists();
         } catch (Exception e) {
             log.error("Failed to check stock existence in cache: {}", productId, e);
             return false;
         }
     }
 
-    // 获取缓存过期时间
+    // 获取缓存剩余时间（秒）
     public Long getExpireTime(String productId) {
+        RBucket<Stock> bucket = redissonClient.getBucket(getStockKey(productId));
         try {
-            return redisTemplate.getExpire(getStockKey(productId));
+            return bucket.remainTimeToLive() / 1000; // 转换为秒
         } catch (Exception e) {
             log.error("Failed to get expire time of stock in cache: {}", productId, e);
             return -1L;
         }
     }
 
-    // 缓存预热
-//    @PostConstruct
+    // 缓存预热（使用 Redisson 批量操作）
+    //@PostConstruct
     public void warmupCache() {
         log.info("Starting stock cache warming up...");
         try {
-            // 1. 从数据库查询所有有效库存
             QueryWrapper<StockVO> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("is_deleted", 0);
             List<StockVO> stocks = stockMapper.selectList(queryWrapper);
 
-            if (stocks.isEmpty()) {
-                log.info("No stocks found for warming up");
-                return;
-            }
-
-            // 2. 批量写入Redis
-            for (StockVO stockVO : stocks) {
+            stocks.parallelStream().forEach(stockVO -> {
                 Stock stock = Stock.fromVO(stockVO);
-                String key = getStockKey(stock.getProductId());
-                redisTemplate.opsForValue().set(
-                        key,
-                        stock,
-                        CACHE_EXPIRE_TIME,
-                        TimeUnit.MINUTES
-                );
-            }
+                RBucket<Stock> bucket = redissonClient.getBucket(getStockKey(stock.getProductId()));
+                bucket.set(stock, CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
+            });
 
-            log.info("Successfully warmed up {} stocks to cache", stocks.size());
+            log.info("Successfully warmed up {} stocks", stocks.size());
         } catch (Exception e) {
             log.error("Failed to warm up stock cache", e);
         }
     }
 
-    // 定时刷新缓存
-//    @Scheduled(fixedRate = 300000) // 5分钟刷新一次
+    // 定时缓存刷新（优化版）
+    //@Scheduled(fixedRate = 300_000)
     public void refreshCache() {
         log.info("Starting stock cache refresh...");
         try {
-            // 1. 从数据库获取所有有效库存
             QueryWrapper<StockVO> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("is_deleted", 0);
             List<StockVO> stocks = stockMapper.selectList(queryWrapper);
 
-            // 2. 遍历每个库存记录
-            for (StockVO stockVO : stocks) {
-                Stock stock = Stock.fromVO(stockVO);
-                String key = getStockKey(stock.getProductId());
+            stocks.parallelStream().forEach(stockVO -> {
+                Stock dbStock = Stock.fromVO(stockVO);
+                String key = getStockKey(dbStock.getProductId());
+                RBucket<Stock> bucket = redissonClient.getBucket(key);
 
-                // 3. 获取当前缓存中的库存
-                Stock cachedStock = redisTemplate.opsForValue().get(key);
+                // 使用 compareAndSet 保证原子性更新
+                bucket.compareAndSet(bucket.get(), dbStock);
+            });
 
-                // 4. 如果缓存不存在或者数据不一致，则更新缓存
-                if (!stock.equals(cachedStock)) {
-                    redisTemplate.opsForValue().set(
-                            key,
-                            stock,
-                            CACHE_EXPIRE_TIME,
-                            TimeUnit.MINUTES
-                    );
-                    log.debug("Updated cache for stock: {}", stock.getProductId());
-                }
-            }
-
-            log.info("Successfully refreshed {} stocks in cache", stocks.size());
+            log.info("Refreshed {} stocks", stocks.size());
         } catch (Exception e) {
             log.error("Failed to refresh stock cache", e);
         }
     }
 
-    // 手动触发缓存刷新
-    public void forceRefresh() {
-        log.info("Force refreshing stock cache...");
-        refreshCache();
+    // 增强版预留库存操作（带分布式锁）
+    public boolean safeUpdateReservedQuantity(String productId, long quantity) {
+        RLock lock = redissonClient.getLock("stock_lock:" + productId);
+        try {
+            if (lock.tryLock(10, 30, TimeUnit.SECONDS)) {
+                RBucket<Stock> bucket = redissonClient.getBucket(getStockKey(productId));
+                Stock stock = bucket.get();
+
+                if (stock != null) {
+                    long newReserved = stock.getReservedQuantity() + quantity;
+                    if (newReserved >= 0 && newReserved <= stock.getQuantity()) {
+                        stock.setReservedQuantity(newReserved);
+                        bucket.set(stock, CACHE_EXPIRE_MINUTES, TimeUnit.MINUTES);
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 }

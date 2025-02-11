@@ -68,40 +68,38 @@ public class Stock {
     /**
      * 从Redis的Map中构造Stock对象
      */
-    public static Stock fromRedisMap(Map<Object, Object> map) {
+    public static Stock fromRedisMap(Map<String, Object> map) {
         Stock stock = new Stock();
 
-        if (map.containsKey("id")) {
+        if (map.containsKey("id") && map.get("id") != null
+                && !"null".equals(map.get("id").toString())) {
             stock.setId(Long.parseLong(map.get("id").toString()));
         }
-        if (map.containsKey("productId")) {
+        if (map.containsKey("productId") && map.get("productId") != null) {
             stock.setProductId(map.get("productId").toString());
         }
-        if (map.containsKey("productName")) {
+        if (map.containsKey("productName") && map.get("productName") != null) {
             stock.setProductName(map.get("productName").toString());
         }
-        if (map.containsKey("price")) {
+        if (map.containsKey("price") && map.get("price") != null) {
             stock.setPrice(new BigDecimal(map.get("price").toString()));
         }
-        if (map.containsKey("quantity")) {
+        if (map.containsKey("quantity") && map.get("quantity") != null) {
             stock.setQuantity(Long.parseLong(map.get("quantity").toString()));
         }
-        if (map.containsKey("reservedQuantity")) {
+        if (map.containsKey("reservedQuantity") && map.get("reservedQuantity") != null) {
             stock.setReservedQuantity(Long.parseLong(map.get("reservedQuantity").toString()));
         }
-        if (map.containsKey("createdAt")) {
+        if (map.containsKey("createdAt") && map.get("createdAt") != null) {
             stock.setCreatedAt(LocalDateTime.parse(map.get("createdAt").toString()));
         }
-        if (map.containsKey("updatedAt")) {
+        if (map.containsKey("updatedAt") && map.get("updatedAt") != null) {
             stock.setUpdatedAt(LocalDateTime.parse(map.get("updatedAt").toString()));
         }
 
         return stock;
     }
 
-    /**
-     * 转换Stock对象为适合Redis存储的Map
-     */
     public Map<String, Object> toRedisMap() {
         Map<String, Object> map = new HashMap<>();
 
